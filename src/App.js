@@ -27,7 +27,7 @@ function App() {
                   This is the Modal!
                 </h1>
                 <p className="modal-content">
-                  I hope you learn something from this codepen! I use codepen as a learning and studying tool, and I want to give back a little bit with the more I learn! I also try and keep it simple with using plain HTML/CSS/Javascript
+                    This is a modal rendered on a difgferent mount point (#modal)  from #root
                 </p>
                 <button onClick={() => setShowModal(false)} className="btn btn-modal-close">Close Me!</button>
               </div>
