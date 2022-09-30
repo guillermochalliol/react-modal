@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+---
+description: "Portals allow you to render to a place outside of a component from within a component. Think of a contextual nav bar or side nav."
+---
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Another nice feature React is something called a Portal. You can think of the portal as a separate mount point (the actual DOM node which your app is put into) for your React app. A common use case for this is going to be doing modals. You'll have your normal app with its normal mount point and then you can also put different content into a separate mount point (like a modal or a contextual nav bar) directly from a component. Pretty cool!
 
-## Available Scripts
+First thing, let's go into index.html and add a separate mount point:
 
-In the project directory, you can run:
+```html
+<!-- below #root -->
+<div id="modal"></div>
+```
 
-### `npm start`
+This where the modal will actually be mounted whenever we render to this portal. Totally separate from our app root.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Next create a file called Modal.js:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```javascript
+import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
-### `npm test`
+const Modal = ({ children }) => {
+  const elRef = useRef(null);
+  if (!elRef.current) {
+    elRef.current = document.createElement("div");
+  }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  useEffect(() => {
+    const modalRoot = document.getElementById("modal");
+    modalRoot.appendChild(elRef.current);
+    return () => modalRoot.removeChild(elRef.current);
+  }, []);
 
-### `npm run build`
+  return createPortal(<div>{children}</div>, elRef.current);
+};
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+export default Modal;
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- This will mount a div and mount inside of the portal whenever the Modal is rendered and then _remove_ itself whenever it's unrendered.
+- We're using the feature of `useEffect` that if you need to clean up after you're done (we need to remove the div once the Modal is no longer being rendered) you can return a function inside of `useEffect` that cleans up.
+- We're also using a ref here via the hook `useRef`. Refs are like instance variables for function components. Whereas on a class you'd say `this.myVar` to refer to an instance variable, with function components you can use refs. They're containers of state that live outside a function's closure state which means anytime I refer to `elRef.current`, it's **always referring to the same element**. This is different from a `useState` call because the variable returned from that `useState` call will **always refer to the state of the variable when that function was called.** It seems like a weird hair to split but it's important when you have async calls and effects because that variable can change and nearly always you want the `useState` variable, but with something like a portal it's important we always refer to the same DOM div; we don't want a lot of portals. 
+- Down at the bottom we use React's `createPortal` to pass the children (whatever you put inside `<Modal></Modal>`) to the portal div.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Now go to App.js and add:
 
-### `npm run eject`
+```javascript
+// at the top
+import Modal from "./Modal";
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+// state of show modal
+  const [showModal, setShowModal] = useState(false);
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+// This will be close the modal in case  you click in the bnackdrop but not onm the modal itself
+  const handleShowModal = (e) => {
+    if (e.target.id === 'backdrop') {
+      setShowModal(null);
+    }
+  }
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+// add onClick to <button>
+<button onClick={() => setShowModal(false)} className="btn btn-modal-close">Close Me!</button>
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+// below description
+{showModal &&
+    <Modal>
+    <div onClick={handleShowModal} id="backdrop" className="backdrop">
+        <div className="modal">
+        <h1 className="modal-title">
+            This is the Modal!
+        </h1>
+        <p className="modal-content">
+            I hope you learn something from this codepen! I use codepen as a learning and studying tool, and I want to give back a little bit with the more I learn! I also try and keep it simple with using plain HTML/CSS/Javascript
+        </p>
+        <button onClick={() => setShowModal(false)} className="btn btn-modal-close">Close Me!</button>
+        </div>
+    </div>
+    </Modal>  
+}
+```
 
-## Learn More
+- Notice that despite we're rendering a whole different part of the DOM we're still referencing the state in Details.js. This is the magic of Portals. You can use state but render in different parts of the DOM. Imagine a sidebar with contextual navigation. Or a contextual footer. It opens up a lot of cool possibilities.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+That's it! That's how you make a modal using a portal in React. This used to be significantly more difficult to do but with portals it became trivial. The nice thing about portals is that despite the actual elements being in different DOM trees, these are in the same React trees, so you can do event bubbling up from the modal. Some times this is useful if you want to make your Modal more flexible (like we did.)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+> 🏁 [Click here to see the project  credits by Brian Holt][step]
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+[portal]: https://reactjs.org/docs/portals.html
+[step]: https://github.com/btholt/citr-v7-project/tree/master/12-portals-and-refs

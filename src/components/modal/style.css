@@ -1,0 +1,56 @@
+.backdrop{
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index:20;
+}
+
+.modal {
+    background-color: #FFF;
+    padding: 1rem 1.5rem;
+    width: 20rem;
+    height: 20rem;
+    margin: 10px auto;
+    border-radius: .75rem;
+    text-align: center;
+}
+
+.modal-title {
+    color: #1cb9f7;
+}
+
+.modal-content {
+    font-family: "Montserrat", sans-serif;
+    color: #313F4B;
+}
+
+/*BUTTON STYLES*/
+.btn {
+    border: 2px solid #fff;
+    border-radius: 1rem;
+    background-color: #1cb9f7;
+    color: #fff;
+    padding: .5rem 1.5rem;
+    margin-top: .5rem;
+    font-weight: bold;
+}
+
+.btn:hover {
+    cursor: pointer;
+}
+
+.btn-modal-open {
+    margin-top: 1em;
+}
+
+.btn-modal-close {
+    border: 2px solid #2978ee;
+}
+
